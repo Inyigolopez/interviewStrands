@@ -1,10 +1,13 @@
 package com.strands.interviews.eventsystem.impl;
 
+import com.strands.interviews.eventsystem.AllEventsListener;
 import com.strands.interviews.eventsystem.EventManager;
 import com.strands.interviews.eventsystem.InterviewEvent;
 import com.strands.interviews.eventsystem.InterviewEventListener;
 
 import java.util.*;
+
+import org.apache.log4j.xml.Log4jEntityResolver;
 
 /**
  * Manages the firing and receiving of events.
@@ -16,14 +19,16 @@ import java.util.*;
  */
 public class DefaultEventManager implements EventManager
 {
+	
     private Map listeners = new HashMap();
     private Map listenersByClass = new HashMap();
+    private InterviewEventListener allEventsListener = null;
 
     public void publishEvent(InterviewEvent event)
     {
         if (event == null)
         {
-            System.err.println("Null event fired?");
+            System.err.println("Null event captured");
             return;
         }
 
@@ -32,7 +37,11 @@ public class DefaultEventManager implements EventManager
 
     private Collection calculateListeners(Class eventClass)
     {
-        return (Collection) listenersByClass.get(eventClass);
+    	Collection listenerCollection = (Collection) listenersByClass.get(eventClass);
+    	if( listenerCollection == null || listenerCollection.isEmpty()){
+    		listenerCollection = (Collection) allEventsListener;
+    	}
+        return listenerCollection;
     }
 
     public void registerListener(String listenerKey, InterviewEventListener listener)
@@ -48,6 +57,12 @@ public class DefaultEventManager implements EventManager
 
         Class[] classes = listener.getHandledEventClasses();
 
+        
+        if (classes == null || classes.length == 0) {
+        	getAllEventsListener();
+        }
+        
+        
         for (int i = 0; i < classes.length; i++)
             addToListenerList(classes[i], listener);
 
@@ -91,4 +106,22 @@ public class DefaultEventManager implements EventManager
     {
         return listeners;
     }
+
+	public InterviewEventListener getAllEventsListener() {
+		if (allEventsListener == null){
+			allEventsListener = new AllEventsListener();
+		}
+		return allEventsListener;
+	}
+
+	public void setAllEventsListener(InterviewEventListener allEventsListener) {
+		this.allEventsListener = allEventsListener;
+	}
+
+	public boolean isAllEventsListenerInstalled()
+	{
+		return allEventsListener != null;
+	}
+	
+	
 }
