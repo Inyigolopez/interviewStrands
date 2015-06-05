@@ -32,6 +32,21 @@ public class DefaultEventManagerTest {
 		eventManager.publishEvent(new SubEvent(this));
 		assertTrue(subeventListenerMock.isCalled());
 	}
+	
+	@Test
+	public void testRegisterListenerSubclassAndSimple()
+	{
+		EventListenerMock simpleListenerMock = new EventListenerMock(new Class[]{SimpleEvent.class});
+		EventListenerMock subListenerMock = new EventListenerMock(new Class[]{SubEvent.class});
+	
+		eventManager.registerListener("simple.listener",simpleListenerMock);
+		eventManager.registerListener("sub.listener", subListenerMock);
+	
+		eventManager.publishEvent(new SubEvent(this));
+	
+		assertTrue(simpleListenerMock.isCalled());
+		assertTrue(subListenerMock.isCalled());
+	}
 
 	@Test
 	public void testListenerWithoutMatchingEventClass() {
